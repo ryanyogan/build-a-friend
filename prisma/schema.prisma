@@ -1,13 +1,46 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model Category {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  // Attributes
+  id   String @id @default(cuid())
   name String
+
+  // Relationships
+  friends Friend[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+}
+
+model Friend {
+  // Attributes
+  id           String @id @default(cuid())
+  userId       String
+  userName     String
+  src          String
+  name         String @db.Text
+  description  String
+  instructions String @db.Text
+  seed         String @db.Text
+
+  // Relationships
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  @@index([categoryId])
+  @@fulltext([name])
 }
