@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import ChatForm from "../inputs/chat-form";
 import ChatHeader from "../shared/chat-header";
+import { ChatMessageProps } from "../shared/chat-message";
 import ChatMessages from "../shared/chat-messages";
 
 interface ChatClientProps {
@@ -19,13 +20,13 @@ interface ChatClientProps {
 
 export default function ChatClient({ friend }: ChatClientProps) {
   const router = useRouter();
-  const [messages, setMessages] = useState<any[]>(friend.messages);
+  const [messages, setMessages] = useState<ChatMessageProps[]>(friend.messages);
 
   const { input, isLoading, handleInputChange, handleSubmit, setInput } =
     useCompletion({
       api: `/api/chat/${friend.id}`,
       onFinish(_prompt, completion) {
-        const systemMessage = {
+        const systemMessage: ChatMessageProps = {
           role: "system",
           content: completion,
         };
@@ -39,7 +40,7 @@ export default function ChatClient({ friend }: ChatClientProps) {
     });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    const userMessage = {
+    const userMessage: ChatMessageProps = {
       role: "user",
       content: input,
     };

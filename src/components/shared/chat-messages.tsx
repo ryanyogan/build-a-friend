@@ -1,11 +1,12 @@
 "use client";
 
 import { Friend } from "@prisma/client";
-import ChatMessage from "./chat-message";
+import { useEffect, useState } from "react";
+import ChatMessage, { ChatMessageProps } from "./chat-message";
 
 interface ChatMessagesProps {
   friend: Friend;
-  messages: any[];
+  messages: ChatMessageProps[];
   isLoading: boolean;
 }
 
@@ -14,14 +15,37 @@ export default function ChatMessages({
   messages = [],
   isLoading,
 }: ChatMessagesProps) {
+  const [fakeLoading, setFakeLoading] = useState(
+    messages.length === 0 ? true : false
+  );
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setFakeLoading(false);
+    }, 1_000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
+
   return (
     <div className="flex-1 overflow-y-auto pr-4">
       <ChatMessage
+        isLoading={fakeLoading}
         src={friend.src}
         role="system"
         content={`Hello, I am ${friend.name}`}
       />
-      <ChatMessage role="user" content="What is up!" />
+
+      {messages.map((message) => (
+        <ChatMessage
+          role={message.role}
+          key={message.content}
+          content={message.content}
+          src={message.src}
+        />
+      ))}
     </div>
   );
 }
