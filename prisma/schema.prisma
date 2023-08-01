@@ -35,7 +35,8 @@ model Friend {
 
   // Relationships
   categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  category   Category  @relation(fields: [categoryId], references: [id])
+  messages   Message[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -43,4 +44,25 @@ model Friend {
 
   @@index([categoryId])
   @@fulltext([name])
+}
+
+enum Role {
+  user
+  system
+}
+
+model Message {
+  id      String @id @default(cuid())
+  role    Role
+  content String @db.Text
+
+  friendId String
+  userId   String
+  friend   Friend @relation(fields: [friendId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  @@index([friendId])
 }
