@@ -40,6 +40,9 @@ export default function ChatHeader({ friend }: ChatHeaderProps) {
       toast({
         description: "Deleted!",
       });
+
+      router.refresh();
+      router.push("/");
     } catch (error) {
       toast({
         description: "Something went wrong",
