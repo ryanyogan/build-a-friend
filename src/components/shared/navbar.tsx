@@ -40,7 +40,7 @@ export default function Navbar() {
 
         <ThemeToggle />
 
-        <UserButton />
+        <UserButton afterSignOutUrl="/" />
       </div>
     </div>
   );
