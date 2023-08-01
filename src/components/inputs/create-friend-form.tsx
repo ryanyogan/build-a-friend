@@ -1,9 +1,12 @@
 "use client";
 
 import { PREAMBLE, SEED_CHAT } from "@/lib/constants";
+import { formSchema } from "@/schemas/form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category, Friend } from "@prisma/client";
+import axios from "axios";
 import { Wand2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ImageUpload from "../shared/image-upload";
@@ -27,37 +30,18 @@ import {
 } from "../ui/select";
 import { Separator } from "../ui/separator";
 import { Textarea } from "../ui/textarea";
+import { useToast } from "../ui/use-toast";
 
 interface CreateFriendFormProps {
   initialData?: Friend | null;
   categories: Category[];
 }
 
-const formSchema = z.object({
-  name: z.string().min(1, {
-    message: "Name is required",
-  }),
-  description: z.string().min(1, {
-    message: "Description is required",
-  }),
-  instructions: z.string().min(200, {
-    message: "Instructions require at least 200 characters",
-  }),
-  seed: z.string().min(200, {
-    message: "Seed require at least 200 characters",
-  }),
-  src: z.string().min(1, {
-    message: "Image is required",
-  }),
-  categoryId: z.string().min(1, {
-    message: "Cateogry is required",
-  }),
-});
-
 export default function CreateFriendForm({
   initialData,
   categories,
 }: CreateFriendFormProps) {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -69,11 +53,30 @@ export default function CreateFriendForm({
       categoryId: undefined,
     },
   });
+  const { toast } = useToast();
 
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    try {
+      if (initialData) {
+        await axios.patch(`/api/friend/${initialData.id}`, values);
+      } else {
+        await axios.post("/api/friend", values);
+      }
+
+      toast({
+        description: "Success.",
+      });
+
+      router.refresh();
+      router.push("/");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: "Something Went Wrong",
+      });
+    }
   };
 
   return (
